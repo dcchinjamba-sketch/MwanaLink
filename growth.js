@@ -90,4 +90,5 @@ document.addEventListener('click',function(e){
 new MutationObserver(function(){var m=$('#main');if(!m||$('#gwrap'))return;
  if(!m.querySelector('.tab.active[data-tab="growth"]'))return;var e=m.querySelector('.empty');if(!e)return;
  var w=document.createElement('div');w.id='gwrap';e.replaceWith(w);render()}).observe($('#main'),{childList:true,subtree:true});
+window.MWLG={calc:calc,alerts:alerts,sorted:sorted,chart:chart,zcell:zcell};
 })();
