@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0b6b58">
 <title>MwanaLink | Digital Child Health Record</title>
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="components.css">
 </head>
 <body>
 <header class="topbar">
@@ -15,56 +16,24 @@
     <button class="themebtn" id="themeBtn" type="button">Theme: System</button>
   </div>
 </header>
-
+<nav class="mnav" id="mnav" aria-label="Menu"></nav>
 <div class="layout">
   <aside class="sidebar">
-    <div class="side-label">Workspace</div>
-    <button class="nav active"><span class="ico">▦</span> Dashboard</button>
-    <button class="nav"><span class="ico">▤</span> Child records</button>
-    <button class="nav"><span class="ico">＋</span> Register child</button>
-    <button class="nav"><span class="ico">⌕</span> Find a child</button>
-    <div class="side-label" style="margin-top:18px">Management</div>
-    <button class="nav"><span class="ico">▥</span> Reports</button>
-    <button class="nav"><span class="ico">◷</span> Audit trail</button>
+    <div id="sidenav"></div>
     <div class="sidebar-note"><b>Prototype notice</b><br>This demonstration uses fictional records stored on this device. It is not approved for real patient information or clinical use.</div>
   </aside>
-
-  <main class="main">
-    <div class="welcome">
-      <div>
-        <div class="eyebrow">Health facility workspace</div>
-        <h1>Dashboard</h1>
-        <div class="sub">Overview of child health services at your facility.</div>
-      </div>
-      <div class="switcher">
-        <button class="active" type="button">Health facility</button>
-        <button type="button">Parent / guardian</button>
-      </div>
-    </div>
-
-    <div class="grid stats">
-      <div class="stat"><div class="stat-top">Children registered<span class="stat-icon">☺</span></div><strong>0</strong><small>Total records</small></div>
-      <div class="stat"><div class="stat-top">Overdue vaccines<span class="stat-icon">!</span></div><strong>0</strong><small>Need follow-up</small></div>
-      <div class="stat"><div class="stat-top">Growth alerts<span class="stat-icon">↗</span></div><strong>0</strong><small>For review</small></div>
-      <div class="stat"><div class="stat-top">Appointments<span class="stat-icon">▣</span></div><strong>0</strong><small>Upcoming</small></div>
-    </div>
-
-    <div class="card">
-      <div class="card-head"><h2>Setup progress</h2><span class="status good">Step 1 complete</span></div>
-      <p>The MwanaLink layout is working. Next we add the demo data and the child records pages.</p>
-    </div>
-  </main>
+  <main class="main" id="main"></main>
 </div>
-
 <div class="footer">MwanaLink · Functional prototype · Fictional demonstration data only</div>
-
+<div id="toastRoot"></div>
+<script src="data.js"></script>
+<script src="app.js"></script>
 <script>
 var KEY='mwl_theme',order=['system','light','dark'],btn=document.getElementById('themeBtn');
 function get(){try{return localStorage.getItem(KEY)||'system'}catch(e){return 'system'}}
 function apply(t){var r=document.documentElement;if(t==='system')r.removeAttribute('data-theme');else r.setAttribute('data-theme',t);btn.textContent='Theme: '+t.charAt(0).toUpperCase()+t.slice(1)}
 apply(get());
 btn.onclick=function(){var n=order[(order.indexOf(get())+1)%order.length];try{localStorage.setItem(KEY,n)}catch(e){}apply(n)};
-document.querySelectorAll('.switcher button').forEach(function(b){b.onclick=function(){document.querySelectorAll('.switcher button').forEach(function(x){x.classList.remove('active')});b.classList.add('active')}});
 </script>
 </body>
 </html>
