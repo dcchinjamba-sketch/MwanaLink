@@ -1,0 +1,16 @@
+.profile-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.child-avatar{width:54px;height:54px;border-radius:16px;background:var(--mint);color:var(--green);display:grid;place-items:center;font-size:24px}
+.profile-head h2{font-size:18px;margin:0 0 4px}
+.profile-meta{font-size:11px;color:var(--muted)}
+.profile-actions{margin-left:auto}
+.tabs{display:flex;gap:5px;border-bottom:1px solid var(--line);margin:17px 0;overflow-x:auto}
+.tab{padding:9px 12px;background:transparent;border:0;color:var(--muted);font-size:12px;font-weight:750;border-bottom:2px solid transparent;white-space:nowrap}
+.tab.active{color:var(--green);border-color:var(--green)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.kv div{padding:12px;background:var(--soft);border-radius:10px}
+.kv small{display:block;font-size:10px;color:var(--muted);margin-bottom:3px}
+.kv b{font-size:13px;word-break:break-word}
+.row2{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.row2>.grow{flex:1;min-width:240px}
+.iform{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0 12px;align-items:end}
+.ierr{color:var(--red);font-size:12px;font-weight:650;min-height:18px;margin:4px 0}
