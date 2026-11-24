@@ -1,0 +1,19 @@
+#authOv{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:18px;overflow:auto}
+.acard{width:min(430px,100%);background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:24px}
+.atabs{display:flex;background:var(--mint);padding:4px;border-radius:10px;gap:3px;margin:16px 0}
+.atabs button{flex:1;border:0;border-radius:7px;padding:9px;background:transparent;font-size:12px;font-weight:750;color:var(--muted)}
+.atabs button.active{background:var(--card);color:var(--green);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.uchip{font-size:11.5px;color:var(--muted);text-align:right;line-height:1.3}
+.uchip b{display:block;color:var(--ink);font-size:12px}
+.btn.danger{background:var(--redbg);color:var(--red)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.mback{position:fixed;inset:0;z-index:90;background:rgba(10,30,32,.55);display:grid;place-items:center;padding:18px}
+.mbox{background:var(--card);color:var(--ink);border-radius:14px;width:min(480px,100%);max-height:90vh;overflow:auto;padding:22px;box-shadow:0 20px 70px rgba(0,0,0,.3)}
+.mbox h2{margin:0 0 8px;font-size:17px}
+.abar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.abar .field{margin:0;flex:1 1 200px}
+.rolepill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800;background:var(--mint);color:var(--green)}
+body.authed .switcher{display:none}
+body.is-guardian .sidebar,body.is-guardian .mnav{display:none}
+body.is-guardian .layout{grid-template-columns:1fr}
+@media(max-width:520px){.uchip{display:none}}
