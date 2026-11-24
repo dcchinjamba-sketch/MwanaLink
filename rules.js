@@ -84,4 +84,8 @@ function fix(){var m=$('#main');if(!m)return;
   if(tabs&&meta&&act&&act.getAttribute('data-ptab')==='overview'){var r=/MWL-[A-Z0-9]+/.exec(meta.textContent),c=r&&byId(r[0]);
    if(c){tabs.insertAdjacentHTML('beforebegin','<div class="gcard" id="pqr" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:6px"><div class="qrwrap" id="pqrc"></div><div style="flex:1;min-width:200px"><b>Your child’s QR code</b><p>Show this QR code at the health facility so the health worker can open '+esc(c.name)+'’s record. Keep it private.</p></div></div>');new QRCode(w.querySelector('#pqrc'),{text:'mwl:'+c.token,width:140,height:140})}}}}
 new MutationObserver(fix).observe($('#main'),{childList:true,subtree:true});
+MWL.all=function(){return real.children};
+new MutationObserver(function(){var m=$('#main'),h1=m&&m.querySelector('h1');
+ if(!h1||h1.textContent!=='Dashboard'||!isStaff())return;
+ m.querySelectorAll('.stat').forEach(function(s){if(s.textContent.indexOf('Vaccine doses recorded')<0||s.dataset.x)return;s.dataset.x=1;var n=0;real.children.forEach(function(c){c.imm.forEach(function(i){if(!i.void&&i.facility===MWL.FACILITY)n++})});s.querySelector('strong').textContent=n;s.querySelector('small').textContent='Given by this facility'})}).observe($('#main'),{childList:true,subtree:true});
 })();
