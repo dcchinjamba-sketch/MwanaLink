@@ -68,4 +68,13 @@ new MutationObserver(function(){var m=$('#main');if(!m)return;
  var pa=m.querySelector('.profile-actions');if(pa&&pa.querySelector('[data-back]')&&!pa.querySelector('[data-rdl]'))pa.insertAdjacentHTML('afterbegin','<button class="btn secondary small" data-rdl="1">Download report</button><button class="btn outline small" data-rprint="1">Print / PDF</button>');
  if($('#rwrap'))return;var ph=null;m.querySelectorAll('.card').forEach(function(c){var h=c.querySelector('h2');if(h&&h.textContent==='Reports'&&c.textContent.indexOf('later step')>-1)ph=c});
  if(!ph)return;var w=document.createElement('div');w.id='rwrap';ph.replaceWith(w);render()}).observe($('#main'),{childList:true,subtree:true});
+monthly=function(m){
+ var names=[],o={},staff=document.body.classList.contains('is-staff');
+ MWL.SCHEDULE.forEach(function(s){if(names.indexOf(s[0])<0)names.push(s[0])});names.push('Other (non-routine)');
+ names.forEach(function(n){o[n]={t:0,d:{}}});
+ (MWL.all?MWL.all():MWL.db.children).forEach(function(c){c.imm.forEach(function(i){
+  if(i.void||i.date.slice(0,7)!==m)return;
+  if(staff&&i.facility!==MWL.FACILITY)return;
+  var k=o[i.vaccine]?i.vaccine:'Other (non-routine)',key=i.dose==null?'–':sh(i.dose);o[k].t++;o[k].d[key]=(o[k].d[key]||0)+1})});
+ return names.map(function(n){var b=Object.keys(o[n].d).sort().map(function(k){return k+': '+o[n].d[k]}).join(', ');return{n:n,t:o[n].t,b:b||'–'}})};
 })();
