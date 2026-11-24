@@ -3,7 +3,12 @@ var $=function(s){return document.querySelector(s)},esc=MWL.esc,real=MWL.db,unsc
 var POS=['Nurse','Midwife','Medical Officer','Clinical Officer','Environmental Health Technologist','Other (specify)'];
 var isStaff=function(){return document.body.classList.contains('is-staff')};
 var own=function(c){return c.origin===MWL.FACILITY};
-function toast(t){var r=$('#toastRoot');if(r){r.innerHTML='<div class="toast">'+esc(t)+'</div>';setTimeout(function(){r.innerHTML=''},3200)}}
+function toast(t){var r=$('#toastRoot');if(r){r.innerHTML='<div class="toast">'+esc(t)+'</div>';setTimeout(function(){r.innerHTML=''},3600)}}
+
+/* Fixed QR tokens for the four fictional demo children, so QR codes work across devices. */
+var DEMO_TOK={'MWL-A1B2C3':'a1b2c3d4e5f60718293a4b5c','MWL-D4E5F6':'d4e5f6a7b8c9d0e1f2a3b4c5','MWL-G7H8J9':'g7h8j9'.replace(/[^0-9a-f]/g,'')+'1c2d3e4f5a6b7c8d9e0f1a','MWL-K2L3M4':'4b2c3d4e5f60718293a4b5c6'};
+DEMO_TOK['MWL-G7H8J9']='17c2d3e4f5a6b7c8d9e0f1a2';
+(function(){var ch=false;real.children.forEach(function(c){var t=DEMO_TOK[c.id];if(t&&c.fictional&&c.token!==t){c.token=t;ch=true}});if(ch)MWL.save()})();
 
 /* 1. Facility scope: staff statistics cover only children registered at their facility */
 var chH={get:function(t,k){if(k==='push')return function(){return t.push.apply(t,arguments)};var f=t.filter(own),v=f[k];return typeof v==='function'?v.bind(f):v}};
@@ -48,8 +53,10 @@ new MutationObserver(function(){if($('#uchip')&&MWL.STAFF.indexOf('(')<0)applyPo
 /* 4. QR scanning */
 try{if('BarcodeDetector' in window)bd=new BarcodeDetector({formats:['qr_code']})}catch(e){}
 function stopScan(){if(stream){stream.getTracks().forEach(function(t){t.stop()});stream=null}if(mb){mb.remove();mb=null}}
-function handle(code){var m=/^mwl:([0-9a-f]{24})$/.exec((code||'').trim().toLowerCase()),c=m&&real.children.filter(function(x){return x.token===m[1]})[0];
- if(!c){toast('This is not a recognised MwanaLink QR code.');return}
+function handle(code){var m=/^mwl:([0-9a-f]{24})$/.exec((code||'').trim().toLowerCase());
+ if(!m){toast('This is not a MwanaLink QR code.');return}
+ var c=real.children.filter(function(x){return x.token===m[1]})[0];
+ if(!c){toast('Valid MwanaLink QR code, but this child’s record is not on this device. In this demo, records you register exist only on the device where you registered them.');return}
  granted[c.id]=1;MWL.audit('Record retrieved',c.id,'Opened by QR scan');openCard(c.id)}
 async function scan(){
  mb=document.createElement('div');mb.className='mback';
@@ -63,9 +70,9 @@ async function scan(){
   if(v.readyState>=2){try{if(bd){var r=await bd.detect(v);if(r[0])code=r[0].rawValue}else{cv.width=v.videoWidth;cv.height=v.videoHeight;cx.drawImage(v,0,0);var im=cx.getImageData(0,0,cv.width,cv.height),q=window.jsQR(im.data,im.width,im.height);if(q)code=q.data}}catch(e){}}
   if(code){stopScan();handle(code);return}setTimeout(tick,200)})()}
 
-/* Page patches */
+/* Page patches (each runs once per element, so they cannot loop) */
 function fix(){var m=$('#main');if(!m)return;
- var cm=m.querySelector('#comm');if(cm&&!cm.querySelector('option[value="WhatsApp"]')){var cur=cm.value;cm.innerHTML=['SMS','Phone call','WhatsApp','Any method'].map(function(o){return'<option'+(o===cur?' selected':'')+'>'+o+'</option>'}).join('')}
+ var cm=m.querySelector('#comm');if(cm&&!cm.dataset.done){cm.dataset.done='1';var cur=cm.value;cm.innerHTML=['SMS','Phone call','WhatsApp','Any method'].map(function(o){return'<option'+(o===cur?' selected':'')+'>'+o+'</option>'}).join('')}
  var sn=m.querySelector('#sn');if(sn&&!m.querySelector('#spos'))sn.closest('.field').insertAdjacentHTML('afterend','<div class="field"><label for="spos">Position</label><select id="spos"><option value="">Select position</option>'+POS.map(function(p){return'<option>'+p+'</option>'}).join('')+'</select></div><div class="field hidden" id="sposw"><label for="spoth">Specify position</label><input id="spoth" maxlength="40" autocomplete="off"></div>');
  m.querySelectorAll('table').forEach(function(t){var h=t.querySelector('thead tr');if(!h||t.dataset.pos||h.textContent.indexOf('Username')<0)return;t.dataset.pos=1;var th=document.createElement('th');th.textContent='Position';h.insertBefore(th,h.children[2]);
   t.querySelectorAll('tbody tr').forEach(function(r){var u=(real.users||[]).filter(function(x){return x.username===r.children[1].textContent})[0],td=document.createElement('td');td.textContent=u&&u.position||'–';r.insertBefore(td,r.children[2])})});
