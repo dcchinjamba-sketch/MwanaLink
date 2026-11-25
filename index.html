@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0b6b58">
 <title>MwanaLink | Digital Child Health Record</title>
+<script>document.documentElement.classList.add('boot')</script>
+<style>html.boot{background:#0b6b58}html.boot body{visibility:hidden}</style>
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="components.css">
 <link rel="stylesheet" href="forms.css">
@@ -62,6 +64,9 @@ function get(){try{return localStorage.getItem(KEY)||'system'}catch(e){return 's
 function apply(t){var r=document.documentElement;if(t==='system')r.removeAttribute('data-theme');else r.setAttribute('data-theme',t);btn.textContent='Theme: '+t.charAt(0).toUpperCase()+t.slice(1)}
 apply(get());
 btn.onclick=function(){var n=order[(order.indexOf(get())+1)%order.length];try{localStorage.setItem(KEY,n)}catch(e){}apply(n)};
+(function(){var d=document.documentElement;function show(){d.classList.remove('boot')}
+if(document.readyState==='complete')setTimeout(show,200);else window.addEventListener('load',function(){setTimeout(show,200)});
+setTimeout(show,3000)})();
 </script>
 </body>
 </html>
