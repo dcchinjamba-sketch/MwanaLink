@@ -1,5 +1,8 @@
 {
   "appId": "org.mwanalink.app",
   "appName": "MwanaLink",
-  "webDir": "www"
+  "webDir": "www",
+  "android": {
+    "adjustMarginsForEdgeToEdge": "force"
+  }
 }
