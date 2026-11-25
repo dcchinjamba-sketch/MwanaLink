@@ -1,10 +1,22 @@
 (function(){
 var $=function(s){return document.querySelector(s)},esc=MWL.esc;
 var BAD=/nderweight|tunted|asted|Zero-dose|overdue|Low birth|MUAC|dropout|Elevated/;
+var DROP=/^(Doses given: |Exposed share of children with a recorded status$|Children with a growth measurement$)/;
+
+/* ---- remove repeated indicators from the table ---- */
+function clean(){
+ var t=$('#indbody table');if(!t)return;var tb=t.querySelector('tbody');if(!tb)return;var seen={};
+ Array.prototype.slice.call(tb.querySelectorAll('tr')).forEach(function(r){var c=r.children;if(c.length<4)return;
+  var b=c[0].querySelector('b'),n=b?b.textContent:'';
+  if(DROP.test(n)||seen[n])r.remove();else seen[n]=1});
+ if(!tb.querySelector('tr'))tb.innerHTML='<tr><td colspan="4" class="muted">No indicators match.</td></tr>';
+ var s=$('#indsum');
+ if(s){var k=tb.querySelectorAll('tr td.num').length,h=s.innerHTML.replace(/Showing <b>\d+<\/b> of \d+ indicators/,'Showing <b>'+k+'</b> indicators');if(h!==s.innerHTML)s.innerHTML=h}}
+
 function rows(){var t=$('#indbody table');if(!t)return[];
  return Array.prototype.map.call(t.querySelectorAll('tbody tr'),function(r){var c=r.children;if(c.length<4)return null;
   var b=c[0].querySelector('b'),d=c[0].querySelector('.muted');
-  return{n:b?b.textContent:'',c:d?d.textContent:'',v:c[1].textContent.trim(),d:c[2].textContent.trim()}}).filter(Boolean)}
+  return{n:b?b.textContent:'',c:d?d.textContent:'',v:c[1].textContent.trim(),d:c[2].textContent.trim(),t:c[3].textContent.trim()}}).filter(Boolean)}
 function pct(r){var m=/^(\d+(?:\.\d+)?)%$/.exec(r.v);return m?parseFloat(m[1]):null}
 
 /* ---- on-screen chart ---- */
@@ -16,13 +28,22 @@ function chartHtml(){
   return'<div style="display:grid;grid-template-columns:minmax(120px,2fr) 3fr 58px;gap:8px;align-items:center;margin:7px 0;font-size:13px"><div>'+esc(r.n)+'</div><div style="height:12px;border-radius:6px;background:rgba(128,128,128,.25);overflow:hidden"><div style="height:100%;width:'+Math.min(100,p)+'%;background:'+(bad?'#d98c1f':'#16836e')+'"></div></div><div style="text-align:right;font-weight:700">'+esc(r.v)+'</div></div>'}).join('')+
   '<div class="muted" style="margin-top:8px">Green: coverage (higher is better). Amber: burden or gap indicators (lower is better).</div>'}
 function sync(){
- var b=$('#indbody');if(!b)return;var card=b.closest('.card');if(!card)return;
+ var b=$('#indbody');if(!b)return;clean();var card=b.closest('.card');if(!card)return;
  var csvb=card.querySelector('[data-icsv]');
  if(csvb&&!card.querySelector('[data-ipdf]'))csvb.insertAdjacentHTML('beforebegin','<button class="btn outline small" data-ipdf="1">Download PDF</button>');
  var h=$('#indchart');
  if(!h){h=document.createElement('div');h.id='indchart';h.className='card';card.parentNode.insertBefore(h,card.nextSibling)}
  var sig=b.textContent;if(h.dataset.s!==sig){h.dataset.s=sig;h.innerHTML=chartHtml()}}
 var main=$('#main');if(main)new MutationObserver(sync).observe(main,{childList:true,subtree:true});
+
+/* ---- CSV (built from the cleaned list) ---- */
+function csv(){
+ var q=function(x){return'"'+String(x).replace(/"/g,'""')+'"'},s=($('#indsum')||{}).textContent||'';
+ var L=[['MwanaLink under-five indicators'],[s],['Generated',MWL.TODAY],[],['Category','Indicator','Value','Detail','Type']].concat(rows().map(function(r){return[r.c,r.n,r.v,r.d,r.t]}));
+ var b=new Blob(['\ufeff'+L.map(function(r){return r.map(q).join(',')}).join('\r\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
+ a.href=URL.createObjectURL(b);a.download='MwanaLink_indicators.csv';document.body.appendChild(a);a.click();
+ setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},600);MWL.audit('Indicators exported','-','CSV ('+rows().length+' indicators)')}
+window.addEventListener('click',function(e){if(e.target.closest('[data-icsv]')){e.stopPropagation();e.preventDefault();csv()}},true);
 
 /* ---- PDF ---- */
 function san(s){return String(s).replace(/[\u2212\u2013\u2014]/g,'-').replace(/[\u2018\u2019]/g,"'").replace(/[\u201c\u201d]/g,'"').replace(/\u2265/g,'>=').replace(/\u2264/g,'<=').replace(/\u00b7/g,'|').replace(/[^\x20-\x7e]/g,'?')}
@@ -43,7 +64,6 @@ function buildPdf(){
  np();rect(0,0,W,64,[11,107,88]);text(M,14,'MwanaLink',18,1,[255,255,255]);text(M,40,'Under-five indicators',10,0,[255,255,255]);y=80;
  wrap(sum,W-2*M,9,0,3).forEach(function(l){text(M,y,l,9,0,DARK);y+=12});
  text(M,y,'Category: '+(tab?tab.textContent:'All')+'   |   Generated: '+MWL.TODAY,9,0,GREY);y+=22;
- /* coverage chart */
  var P=R.filter(function(r){return pct(r)!==null});
  text(M,y,'Coverage and prevalence (%)',12,1,DARK);y+=18;
  if(!P.length){text(M,y,'No percentage indicators in this view.',9,0,GREY);y+=16}
@@ -53,7 +73,6 @@ function buildPdf(){
    rect(M+225,y+1,240,9,[225,228,227]);rect(M+225,y+1,240*Math.min(100,p)/100,9,bad?AMB:GREEN);
    text(M+474,y+1,r.v,8,1,DARK);y+=15});
   need(26);y+=4;rect(M,y+2,8,8,GREEN);text(M+13,y+1,'Coverage (higher is better)',8,0,GREY);rect(M+170,y+2,8,8,AMB);text(M+183,y+1,'Burden or gap (lower is better)',8,0,GREY);y+=20}
- /* table */
  need(40);y+=6;text(M,y,'All indicators in this view',12,1,DARK);y+=20;
  var X1=M,X2=M+215,X3=M+275,W1=205,W3=W-M-X3,lastC='';
  function head(){rect(M,y,W-2*M,15,[226,239,235]);text(X1+4,y+3,'Indicator',8,1);text(X2,y+3,'Value',8,1);text(X3,y+3,'Detail',8,1);y+=18}
@@ -68,7 +87,6 @@ function buildPdf(){
   y+=h;rect(M,y-3,W-2*M,0.4,[225,228,227])});
  if(!R.length)text(M,y,'No indicators match.',9,0,GREY);
  pages.forEach(function(p,i){ops=p;text(M,H-30,'MwanaLink | Demonstration data only | Page '+(i+1)+' of '+pages.length,7,0,GREY)});
- /* assemble PDF file */
  var objs=[];function add(s){objs.push(s);return objs.length}
  add('<< /Type /Catalog /Pages 2 0 R >>');add('');
  add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
