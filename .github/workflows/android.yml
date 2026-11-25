@@ -21,9 +21,18 @@ jobs:
           cp *.html *.js *.css *.png www/ 2>/dev/null || true
       - name: Bundle libraries for offline use
         run: |
-          curl -fL https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js -o www/qrcode.min.js
-          curl -fL https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js -o www/jsQR.min.js
-          sed -i 's#https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js#qrcode.min.js#; s#https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js#jsQR.min.js#' www/index.html
+          if curl -fsSL --retry 3 https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js -o www/qrcode.min.js || curl -fsSL --retry 3 https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@master/qrcode.min.js -o www/qrcode.min.js; then
+            sed -i 's#https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js#qrcode.min.js#' www/index.html
+            echo "QR library bundled"
+          else
+            echo "QR library not bundled, keeping online link"
+          fi
+          if curl -fsSL --retry 3 https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js -o www/jsQR.min.js || curl -fsSL --retry 3 https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js -o www/jsQR.min.js; then
+            sed -i 's#https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js#jsQR.min.js#' www/index.html
+            echo "jsQR bundled"
+          else
+            echo "jsQR not bundled, keeping online link"
+          fi
       - run: npm install
       - run: npx cap add android
       - name: Generate icon and splash
